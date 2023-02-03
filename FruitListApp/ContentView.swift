@@ -1,21 +1,40 @@
-//
-//  ContentView.swift
-//  FruitListApp
-//
-//  Created by 渡邊魁優 on 2023/02/03.
-//
 
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject private var fruitData = FruitData()
+    @State private var isAddView = false
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationStack {
+            VStack {
+                List {
+                    ForEach(fruitData.fruits) { fruit in
+                        ListRow(fruit: fruit)
+                    }
+                    .onDelete(perform: fruitData.deleteFruit)
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            isAddView = true
+                        }) {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+            }
         }
-        .padding()
+        .sheet(isPresented: $isAddView) {
+            AddFruitView(
+                save: { text in
+                    fruitData.fruits.append(Fruit(name: text, check: false))
+                    isAddView = false
+                },
+                cancel: {
+                    isAddView = false
+                }
+            )
+        }
     }
 }
 
